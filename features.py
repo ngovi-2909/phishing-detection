@@ -19,11 +19,12 @@ def get_hostname(url):
 # 1
 def is_ip(url):
     try:
-        if (type(ip_address(url)) is IPv4Address) or (type(ip_address(url)) is IPv6Address):
-            return 1
+        host_name = get_hostname(url)
+        if host_name is None:
+            if (type(ip_address(url)) is IPv4Address) or (type(ip_address(url)) is IPv6Address):
+                return 1
         else:
-            ip = get_hostname(url)
-            return 1 if type(ip_address(ip)) is IPv4Address or IPv6Address else 0
+            return 1 if type(ip_address(host_name)) is IPv4Address or IPv6Address else 0
     except:
         return 0
 
