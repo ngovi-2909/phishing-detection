@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 import requests
 from ipaddress import ip_address, IPv4Address, IPv6Address
+from bs4 import BeautifulSoup
 
 
 
@@ -65,12 +66,12 @@ def countAtSign(url):
 
 # 6
 def countQuestionMark(url):
-    len(re.findall("\?", url))
+    return len(re.findall("\?", url))
 
 
 # 7
 def countHyphen(url):
-    len(re.findall("\-", url))
+    return len(re.findall("\-", url))
 
 
 # 8
@@ -100,9 +101,7 @@ def countAnd(url):
 
 # 13
 def countSlash(url):
-    parsed_url = urlparse(url)
-    path = parsed_url.path
-    return len(re.findall("\/"), url)
+    return len(re.findall(r'/',url))
 
 
 # redirect '//' 14
@@ -153,7 +152,6 @@ def CountStar(url):
 def CountHttp(url):
     parsed_url = urlparse(url)
     protocol = parsed_url.scheme
-    print(re.findall("http", url))
     if (protocol == "http" or protocol == "https"):
         return len(re.findall("http", url)) - 1
     return len(re.findall("http", url))
@@ -191,7 +189,9 @@ def have_prefixOrSuffix(url):
 
 # 26
 def web_forwarding(response):
-    return len(response.history)
+  if(response == ""):
+    return 0
+  return len(response.history)
 
 
 # 27
@@ -240,7 +240,7 @@ def page_rank(key, url):
         else:
             return 0
     except:
-        pass
+        return 0
 
 
 # #30
@@ -249,3 +249,51 @@ def dns_expiration_length(url):
         return 0 if len(socket.gethostbyname(get_hostname(url))) > 0 else 1
     except:
         return 1
+
+#31
+# LinksInScriptTags - Percentile of internal links
+def LinksInScriptTags(response,url):
+
+        i, success = 0, 0
+        if(response == ""):
+          return 0
+        else:
+          soup = BeautifulSoup(response.text, 'html.parser')
+
+          for link in soup.find_all('link', href=True):
+              dots = [x.start(0) for x in re.finditer('\.', link['href'])]
+              if url in link['href'] or urlparse(url).netloc in link['href'] or len(dots) == 1:
+                  success = success + 1
+              i = i + 1
+
+          for script in soup.find_all('script', src=True):
+              dots = [x.start(0) for x in re.finditer('\.', script['src'])]
+              if url in script['src'] or urlparse(url).netloc in script['src'] or len(dots) == 1:
+                  success = success + 1
+              i = i + 1
+          try:
+            percentage = success / float(i) * 100
+            return percentage
+          except:
+            return 0
+ 
+
+# AnchorURL 18
+# Percentile of safe anchor
+def AnchorURL(response,url):
+      if(response ==""):
+        return 0
+      else:
+        domain = urlparse(url).netloc
+        soup = BeautifulSoup(response.text, 'html.parser')
+        i,unsafe = 0,0
+        for a in soup.find_all('a', href=True):
+            if "#" in a['href'] or "javascript" in a['href'].lower() or "mailto" in a['href'].lower() or not (url in a['href'] or domain in a['href']):
+                unsafe = unsafe + 1
+            i = i + 1
+
+        try:
+            percentage = (1 - unsafe / float(i)) * 100
+            return percentage
+        except:
+            return 0
