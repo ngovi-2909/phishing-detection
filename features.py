@@ -8,6 +8,7 @@ import time
 import requests
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from bs4 import BeautifulSoup
+import tldextract
 
 
 
@@ -19,11 +20,12 @@ def get_hostname(url):
 # 1
 def is_ip(url):
     try:
-        if (type(ip_address(url)) is IPv4Address) or (type(ip_address(url)) is IPv6Address):
-            return 1
+        host_name = get_hostname(url)
+        if host_name is None:
+            if (type(ip_address(url)) is IPv4Address) or (type(ip_address(url)) is IPv6Address):
+                return 1
         else:
-            ip = get_hostname(url)
-            return 1 if type(ip_address(ip)) is IPv4Address or IPv6Address else 0
+            return 1 if type(ip_address(host_name)) is IPv4Address or IPv6Address else 0
     except:
         return 0
 
@@ -297,3 +299,67 @@ def AnchorURL(response,url):
             return percentage
         except:
             return 0
+
+
+##
+def words_raw_extraction(domain, subdomain, path):
+    w_domain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", domain.lower())
+    w_subdomain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", subdomain.lower())   
+    w_path = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", path.lower())
+    return w_domain,w_subdomain,w_path
+
+def raw_words(url):
+    domain,subdomain,path = word_raws(url)
+    raw_words = domain + path + subdomain
+    raw_words = list(filter(None,raw_words))
+    return raw_words
+
+def raw_words_host(url):
+    domain,subdomain,path = word_raws(url)
+    host = domain + subdomain
+    return list(filter(None,host))
+
+def raw_words_path(url):
+    domain,subdomain,path = word_raws(url)
+    return list(filter(None,path))
+#Word wrap
+def word_raws(url):
+    extracted_domain = tldextract.extract(url)
+    domain = extracted_domain.domain+'.'+extracted_domain.suffix
+    subdomain = extracted_domain.subdomain
+    tmp = url[url.find(extracted_domain.suffix):len(url)]
+    pth = tmp.partition("/")
+    return words_raw_extraction(extracted_domain.domain, subdomain, pth[2])
+
+def count_www(url):
+    count = 0
+    for word in raw_words(url):
+      if not word.find('www') == -1:
+        count += 1
+    return count
+
+def count_com(url):
+    count = 0
+    for word in raw_words(url):
+      if not word.find('com') == -1:
+        count += 1
+    return count
+
+def length_word_raw(url):
+    return len(raw_words(url)) 
+
+def average_word_length(raw_words):
+    if len(raw_words) ==0:
+        return 0
+    return sum(len(word) for word in raw_words) / len(raw_words)
+
+def longest_word_length(raw_words):
+    if len(raw_words) ==0:
+        return 0
+    return max(len(word) for word in raw_words) 
+
+def shortest_word_length(raw_words):
+    if len(raw_words) ==0:
+        return 0
+    return min(len(word) for word in raw_words) 
+
