@@ -9,12 +9,12 @@ import requests
 from ipaddress import ip_address, IPv4Address, IPv6Address
 from bs4 import BeautifulSoup
 import tldextract
-
+from whois import whois
 
 
 def get_hostname(url):
     parsed_url = urlparse(url)
-    return parsed_url.hostname
+    return parsed_url.path if parsed_url.path == url else parsed_url.hostname
 
 
 # 1
@@ -103,7 +103,7 @@ def countAnd(url):
 
 # 13
 def countSlash(url):
-    return len(re.findall(r'/',url))
+    return len(re.findall(r'/', url))
 
 
 # redirect '//' 14
@@ -191,9 +191,9 @@ def have_prefixOrSuffix(url):
 
 # 26
 def web_forwarding(response):
-  if(response == ""):
-    return 0
-  return len(response.history)
+    if (response == ""):
+        return 0
+    return len(response.history)
 
 
 # 27
@@ -252,45 +252,46 @@ def dns_expiration_length(url):
     except:
         return 1
 
-#31
+
+# 31
 # LinksInScriptTags - Percentile of internal links
-def LinksInScriptTags(response,url):
+def LinksInScriptTags(response, url):
+    i, success = 0, 0
+    if (response == ""):
+        return 0
+    else:
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-        i, success = 0, 0
-        if(response == ""):
-          return 0
-        else:
-          soup = BeautifulSoup(response.text, 'html.parser')
+        for link in soup.find_all('link', href=True):
+            dots = [x.start(0) for x in re.finditer('\.', link['href'])]
+            if url in link['href'] or urlparse(url).netloc in link['href'] or len(dots) == 1:
+                success = success + 1
+            i = i + 1
 
-          for link in soup.find_all('link', href=True):
-              dots = [x.start(0) for x in re.finditer('\.', link['href'])]
-              if url in link['href'] or urlparse(url).netloc in link['href'] or len(dots) == 1:
-                  success = success + 1
-              i = i + 1
-
-          for script in soup.find_all('script', src=True):
-              dots = [x.start(0) for x in re.finditer('\.', script['src'])]
-              if url in script['src'] or urlparse(url).netloc in script['src'] or len(dots) == 1:
-                  success = success + 1
-              i = i + 1
-          try:
+        for script in soup.find_all('script', src=True):
+            dots = [x.start(0) for x in re.finditer('\.', script['src'])]
+            if url in script['src'] or urlparse(url).netloc in script['src'] or len(dots) == 1:
+                success = success + 1
+            i = i + 1
+        try:
             percentage = success / float(i) * 100
             return percentage
-          except:
+        except:
             return 0
- 
+
 
 # AnchorURL 18
 # Percentile of safe anchor
-def AnchorURL(response,url):
-      if(response ==""):
+def AnchorURL(response, url):
+    if (response == ""):
         return 0
-      else:
+    else:
         domain = urlparse(url).netloc
         soup = BeautifulSoup(response.text, 'html.parser')
-        i,unsafe = 0,0
+        i, unsafe = 0, 0
         for a in soup.find_all('a', href=True):
-            if "#" in a['href'] or "javascript" in a['href'].lower() or "mailto" in a['href'].lower() or not (url in a['href'] or domain in a['href']):
+            if "#" in a['href'] or "javascript" in a['href'].lower() or "mailto" in a['href'].lower() or not (
+                    url in a['href'] or domain in a['href']):
                 unsafe = unsafe + 1
             i = i + 1
 
@@ -304,62 +305,118 @@ def AnchorURL(response,url):
 ##
 def words_raw_extraction(domain, subdomain, path):
     w_domain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", domain.lower())
-    w_subdomain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", subdomain.lower())   
+    w_subdomain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", subdomain.lower())
     w_path = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", path.lower())
-    return w_domain,w_subdomain,w_path
+    return w_domain, w_subdomain, w_path
+
 
 def raw_words(url):
-    domain,subdomain,path = word_raws(url)
+    domain, subdomain, path = word_raws(url)
     raw_words = domain + path + subdomain
-    raw_words = list(filter(None,raw_words))
+    raw_words = list(filter(None, raw_words))
     return raw_words
 
+
 def raw_words_host(url):
-    domain,subdomain,path = word_raws(url)
+    domain, subdomain, path = word_raws(url)
     host = domain + subdomain
-    return list(filter(None,host))
+    return list(filter(None, host))
+
 
 def raw_words_path(url):
-    domain,subdomain,path = word_raws(url)
-    return list(filter(None,path))
-#Word wrap
+    domain, subdomain, path = word_raws(url)
+    return list(filter(None, path))
+
+
+# Word wrap
 def word_raws(url):
     extracted_domain = tldextract.extract(url)
-    domain = extracted_domain.domain+'.'+extracted_domain.suffix
+    domain = extracted_domain.domain + '.' + extracted_domain.suffix
     subdomain = extracted_domain.subdomain
     tmp = url[url.find(extracted_domain.suffix):len(url)]
     pth = tmp.partition("/")
     return words_raw_extraction(extracted_domain.domain, subdomain, pth[2])
 
+
 def count_www(url):
     count = 0
     for word in raw_words(url):
-      if not word.find('www') == -1:
-        count += 1
+        if not word.find('www') == -1:
+            count += 1
     return count
+
 
 def count_com(url):
     count = 0
     for word in raw_words(url):
-      if not word.find('com') == -1:
-        count += 1
+        if not word.find('com') == -1:
+            count += 1
     return count
 
+
 def length_word_raw(url):
-    return len(raw_words(url)) 
+    return len(raw_words(url))
+
 
 def average_word_length(raw_words):
-    if len(raw_words) ==0:
+    if len(raw_words) == 0:
         return 0
     return sum(len(word) for word in raw_words) / len(raw_words)
 
+
 def longest_word_length(raw_words):
-    if len(raw_words) ==0:
+    if len(raw_words) == 0:
         return 0
-    return max(len(word) for word in raw_words) 
+    return max(len(word) for word in raw_words)
+
 
 def shortest_word_length(raw_words):
-    if len(raw_words) ==0:
+    if len(raw_words) == 0:
         return 0
-    return min(len(word) for word in raw_words) 
+    return min(len(word) for word in raw_words)
 
+
+#################################################################################
+# check web traffic base on site https://app.neilpatel.com/en/traffic_analyzer ##
+################################################################################
+def web_traffic(url):
+    try:
+        domain = get_hostname(url)
+        url = "https://app.neilpatel.com/api/domain_overview"
+        headers = {
+            "Authorization": "Bearer app#unlogged__8c876ffd05602d555a745fbbd105718a031a6caf"
+        }
+        params = {
+            "domain": domain,
+            "locId": 2840,
+            "language": "en",
+            "withKeywords": True
+        }
+
+        response = requests.get(url, headers=headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            traffic = data["traffic"]
+            return traffic
+        else:
+            return 0
+    except:
+        return 0
+
+def whois_registered_domain(url):
+    try:
+        domain = get_hostname(url)
+        hostname = whois(domain).domain_name
+        if type(hostname) == list:
+            for host in hostname:
+                if re.search(host.lower(), domain):
+                    return 1
+            return 0
+        else:
+            if re.search(hostname.lower(), domain):
+                return 1
+            else:
+                return 0
+    except:
+        return 0
