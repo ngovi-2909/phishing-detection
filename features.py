@@ -375,16 +375,33 @@ def shortest_word_length(raw_words):
         return 0
     return min(len(word) for word in raw_words)
 
+###################################################################################
+# get token of neilpatel https://app.neilpatel.com/api/get_token
+###################################################################################
 
-#################################################################################
-# check web traffic base on site https://app.neilpatel.com/en/traffic_analyzer ##
-################################################################################
+def get_token():
+    url = "https://app.neilpatel.com/api/get_token"
+    params = {
+        "debug": "app_norecaptcha"
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        token = data["token"]
+        return token
+    else:
+        return None
+###################################################################################
+# check web traffic base on site https://app.neilpatel.com/en/traffic_analyzer
+###################################################################################
 def web_traffic(url):
     try:
         domain = get_hostname(url)
+        if not domain.find('www') == -1:
+            domain = domain.replace('www.', '')
         url = "https://app.neilpatel.com/api/domain_overview"
         headers = {
-            "Authorization": "Bearer app#unlogged__8c876ffd05602d555a745fbbd105718a031a6caf"
+            "Authorization": "Bearer " + get_token()
         }
         params = {
             "domain": domain,
