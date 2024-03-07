@@ -329,32 +329,22 @@ def raw_words_path(url):
     domain, subdomain, path = word_raws(url)
     return list(filter(None, path))
 
-def count_www(url):
-    count = 0
-    for word in raw_words(url):
-        if not word.find('www') == -1:
-            count += 1
-    return count
+def count_www_path(url):
+    return raw_words(url).count("www")
 
 
 
-def count_com(url):
-    count = 0
-    for word in raw_words(url):
-        if not word.find('com') == -1:
-            count += 1
-    return count
+def count_com_path(url):
+    return raw_words(url).count("com")
 
 
 def length_word_raw(url):
     return len(raw_words(url))
 
-
 def average_word_length(raw_words):
     if len(raw_words) == 0:
         return 0
     return sum(len(word) for word in raw_words) / len(raw_words)
-
 
 def longest_word_length(raw_words):
     if len(raw_words) == 0:
