@@ -70,12 +70,10 @@ def countAtSign(url):
 def countQuestionMark(url):
     return len(re.findall("\?", url))
 
-
+print(countQuestionMark("https://google.com"))
 # 7
 def countHyphen(url):
     return len(re.findall("\-", url))
-
-
 # 8
 def countDot(url):
     return len(re.findall("\.", url))
@@ -246,7 +244,7 @@ def page_rank(key, url):
 
 
 # #30
-def dns_expiration_length(url):
+def dns_expiration(url):
     try:
         return 0 if len(socket.gethostbyname(get_hostname(url))) > 0 else 1
     except:
@@ -309,12 +307,16 @@ def words_raw_extraction(domain, subdomain, path):
     w_path = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", path.lower())
     return w_domain, w_subdomain, w_path
 
-
+# Word wrap
+def word_raws(url):
+    extracted_domain = tldextract.extract(url)
+    subdomain = extracted_domain.subdomain
+    path = url[url.find(extracted_domain.suffix):len(url)].partition("/")
+    return words_raw_extraction(extracted_domain.domain, subdomain, path[2])
 def raw_words(url):
     domain, subdomain, path = word_raws(url)
     raw_words = domain + path + subdomain
-    raw_words = list(filter(None, raw_words))
-    return raw_words
+    return list(filter(None, raw_words))
 
 
 def raw_words_host(url):
@@ -327,42 +329,22 @@ def raw_words_path(url):
     domain, subdomain, path = word_raws(url)
     return list(filter(None, path))
 
-
-# Word wrap
-def word_raws(url):
-    extracted_domain = tldextract.extract(url)
-    domain = extracted_domain.domain + '.' + extracted_domain.suffix
-    subdomain = extracted_domain.subdomain
-    tmp = url[url.find(extracted_domain.suffix):len(url)]
-    pth = tmp.partition("/")
-    return words_raw_extraction(extracted_domain.domain, subdomain, pth[2])
+def count_www_path(url):
+    return raw_words(url).count("www")
 
 
-def count_www(url):
-    count = 0
-    for word in raw_words(url):
-        if not word.find('www') == -1:
-            count += 1
-    return count
 
-
-def count_com(url):
-    count = 0
-    for word in raw_words(url):
-        if not word.find('com') == -1:
-            count += 1
-    return count
+def count_com_path(url):
+    return raw_words(url).count("com")
 
 
 def length_word_raw(url):
     return len(raw_words(url))
 
-
 def average_word_length(raw_words):
     if len(raw_words) == 0:
         return 0
     return sum(len(word) for word in raw_words) / len(raw_words)
-
 
 def longest_word_length(raw_words):
     if len(raw_words) == 0:
@@ -374,6 +356,7 @@ def shortest_word_length(raw_words):
     if len(raw_words) == 0:
         return 0
     return min(len(word) for word in raw_words)
+
 
 ###################################################################################
 # get token of neilpatel https://app.neilpatel.com/api/get_token
@@ -391,6 +374,8 @@ def get_token():
         return token
     else:
         return None
+
+
 ###################################################################################
 # check web traffic base on site https://app.neilpatel.com/en/traffic_analyzer
 ###################################################################################
@@ -420,6 +405,7 @@ def web_traffic(url):
             return 0
     except:
         return 0
+
 
 def whois_registered_domain(url):
     try:
