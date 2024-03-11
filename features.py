@@ -253,12 +253,11 @@ def dns_expiration(url):
 
 # 31
 # LinksInScriptTags - Percentile of internal links
-def LinksInScriptTags(response, url):
+def LinksInScriptTags(soup, url):
     i, success = 0, 0
-    if (response == ""):
+    if (soup == ""):
         return 0
     else:
-        soup = BeautifulSoup(response.text, 'html.parser')
 
         for link in soup.find_all('link', href=True):
             dots = [x.start(0) for x in re.finditer('\.', link['href'])]
@@ -280,12 +279,11 @@ def LinksInScriptTags(response, url):
 
 # AnchorURL 18
 # Percentile of safe anchor
-def AnchorURL(response, url):
-    if (response == ""):
+def AnchorURL(soup, url):
+    if (soup == ""):
         return 0
     else:
         domain = urlparse(url).netloc
-        soup = BeautifulSoup(response.text, 'html.parser')
         i, unsafe = 0, 0
         for a in soup.find_all('a', href=True):
             if "#" in a['href'] or "javascript" in a['href'].lower() or "mailto" in a['href'].lower() or not (
@@ -299,6 +297,28 @@ def AnchorURL(response, url):
         except:
             return 0
 
+def popup_window(response):
+  if response == "":
+    return 0
+  else: 
+    if "prompt(" in str(response).lower():
+      return 1
+    else:
+      return 0
+
+def abnormal_subdomain(url):
+    if re.search('(http[s]?://(w[w]?|\d))([w]?(\d|-))',url):
+        return 1
+    return 0
+
+def iframe(response):
+  if response == "":
+      return 0
+  else:
+      if re.findall(r"[<iframe>|<frameBorder>]", response):
+          return 1
+      else:
+          return 0
 
 ##
 def words_raw_extraction(domain, subdomain, path):
