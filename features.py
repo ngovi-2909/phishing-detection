@@ -41,7 +41,6 @@ def length_hostname(url):
     hostname = parsed_url.hostname
     return len(hostname)
 
-
 # 4
 shortening_services = r"bit\.ly|goo\.gl|shorte\.st|go2l\.ink|x\.co|ow\.ly|t\.co|tinyurl|tr\.im|is\.gd|cli\.gs|" \
                       r"yfrog\.com|migre\.me|ff\.im|tiny\.cc|url4\.eu|twit\.ac|su\.pr|twurl\.nl|snipurl\.com|" \
@@ -70,7 +69,6 @@ def countAtSign(url):
 def countQuestionMark(url):
     return len(re.findall("\?", url))
 
-print(countQuestionMark("https://google.com"))
 # 7
 def countHyphen(url):
     return len(re.findall("\-", url))
