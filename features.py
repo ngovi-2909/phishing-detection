@@ -15,8 +15,6 @@ from whois import whois
 def get_hostname(url):
     parsed_url = urlparse(url)
     return parsed_url.path if parsed_url.path == url else parsed_url.hostname
-
-
 # 1
 def is_ip(url):
     try:
@@ -28,20 +26,15 @@ def is_ip(url):
             return 1 if type(ip_address(host_name)) is IPv4Address or IPv6Address else 0
     except:
         return 0
-
-
 # 2
 def length_url(url):
     return len(url)
-
 
 # 3
 def length_hostname(url):
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname
     return len(hostname)
-
-
 # 4
 shortening_services = r"bit\.ly|goo\.gl|shorte\.st|go2l\.ink|x\.co|ow\.ly|t\.co|tinyurl|tr\.im|is\.gd|cli\.gs|" \
                       r"yfrog\.com|migre\.me|ff\.im|tiny\.cc|url4\.eu|twit\.ac|su\.pr|twurl\.nl|snipurl\.com|" \
@@ -51,59 +44,39 @@ shortening_services = r"bit\.ly|goo\.gl|shorte\.st|go2l\.ink|x\.co|ow\.ly|t\.co|
                       r"po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|x\.co|" \
                       r"prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|" \
                       r"tr\.im|link\.zip\.net"
-
-
 def tiny_url(url):
     match = re.search(shortening_services, url)
     if match:
         return 1
     else:
         return 0
-
-
 # 5
 def countAtSign(url):
     return len(re.findall("\@", url))
-
-
 # 6
 def countQuestionMark(url):
     return len(re.findall("\?", url))
-
-print(countQuestionMark("https://google.com"))
 # 7
 def countHyphen(url):
     return len(re.findall("\-", url))
 # 8
 def countDot(url):
     return len(re.findall("\.", url))
-
-
 # 9
 def countComma(url):
     return len(re.findall("\,", url))
-
-
 # 10
 def countSemicolon(url):
     return len(re.findall("\;", url))
-
-
 # 11
 def countDollar(url):
     return len(re.findall("\$", url))
-
-
 # 12
 def countAnd(url):
     return len(re.findall("\&"), url)
-
-
 # 13
 def countSlash(url):
     return len(re.findall(r'/', url))
-
-
 # redirect '//' 14
 def have_redirect(url):
     parsed_url = urllib.parse.urlparse(url)
@@ -114,40 +87,26 @@ def have_redirect(url):
         return 1
     else:
         return 0
-
-
 # 15
 def CountEqual(url):
     return len(re.findall("\=", url))
-
-
 # 16
 def CountPercent(url):
     return len(re.findall("\%", url))
-
-
 # 17
 def CountUnderScore(url):
     return len(re.findall("\_", url))
-
-
 # 18
 def CountDotHostName(url):
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname
     return len(re.findall("\.", hostname))
-
-
 # 19
 def CountColon(url):
     return len(re.findall("\:", url))
-
-
 # 20
 def CountStar(url):
     return len(re.findall("\*", url))
-
-
 # 21
 def CountHttp(url):
     parsed_url = urlparse(url)
@@ -156,7 +115,6 @@ def CountHttp(url):
         return len(re.findall("http", url)) - 1
     return len(re.findall("http", url))
 
-
 # 22
 def check_https_protocol(url):
     parsed_url = urlparse(url)
@@ -164,20 +122,14 @@ def check_https_protocol(url):
     if protocol == 'https':
         return 1
     return 0
-
-
 # 23
 def RatioDigitsInHostname(url):
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname
     return len(re.sub("[^0-9]", "", hostname)) / len(hostname)
-
-
 # 24
 def RatioDigitsURL(url):
     return len(re.sub("[^0-9]", "", url)) / len(url)
-
-
 # 25
 def have_prefixOrSuffix(url):
     domain = urlparse(url).netloc
@@ -185,14 +137,11 @@ def have_prefixOrSuffix(url):
         return 1
     else:
         return 0
-
-
 # 26
 def web_forwarding(response):
     if (response == ""):
         return 0
     return len(response.history)
-
 
 # 27
 # DomainRegLen
@@ -209,8 +158,6 @@ def DomainRegLen(whois_response):
             return 0
     except:
         return 0
-
-
 # 28
 def DomainAge(domain_name):
     try:
@@ -226,7 +173,6 @@ def DomainAge(domain_name):
     except:
         return 0
 
-
 # 29
 def page_rank(key, url):
     domain = urlparse(url).netloc
@@ -241,24 +187,18 @@ def page_rank(key, url):
             return 0
     except:
         return 0
-
-
 # #30
 def dns_expiration(url):
     try:
         return 0 if len(socket.gethostbyname(get_hostname(url))) > 0 else 1
     except:
         return 1
-
-
-# 31
 # LinksInScriptTags - Percentile of internal links
 def LinksInScriptTags(soup, url):
     i, success = 0, 0
     if (soup == ""):
         return 0
     else:
-
         for link in soup.find_all('link', href=True):
             dots = [x.start(0) for x in re.finditer('\.', link['href'])]
             if url in link['href'] or urlparse(url).netloc in link['href'] or len(dots) == 1:
@@ -276,8 +216,6 @@ def LinksInScriptTags(soup, url):
         except:
             return 0
 
-
-# AnchorURL 18
 # Percentile of safe anchor
 def AnchorURL(soup, url):
     if (soup == ""):
@@ -290,7 +228,6 @@ def AnchorURL(soup, url):
                     url in a['href'] or domain in a['href']):
                 unsafe = unsafe + 1
             i = i + 1
-
         try:
             percentage = (1 - unsafe / float(i)) * 100
             return percentage
@@ -307,19 +244,20 @@ def popup_window(response):
       return 0
 
 def abnormal_subdomain(url):
-    if re.search('(http[s]?://(w[w]?|\d))([w]?(\d|-))',url):
+    matches = re.findall('(http[s]?://(w[w]?|\d))([w]?(\d|-))', url)
+    if matches:
         return 1
     return 0
 
-def iframe(response):
-  if response == "":
-      return 0
-  else:
-      if re.findall(r"[<iframe>|<frameBorder>]", response):
-          return 1
-      else:
-          return 0
 
+def iframe(response):
+    if response == "":
+        return 0
+    else:
+        if re.compile(r"<iframe>|<frameBorder>").finditer(response):
+            return 1
+        else:
+            return 0
 ##
 def words_raw_extraction(domain, subdomain, path):
     w_domain = re.split("\-|\.|\/|\?|\=|\@|\&|\%|\:|\_", domain.lower())
@@ -338,12 +276,10 @@ def raw_words(url):
     raw_words = domain + path + subdomain
     return list(filter(None, raw_words))
 
-
 def raw_words_host(url):
     domain, subdomain, path = word_raws(url)
     host = domain + subdomain
     return list(filter(None, host))
-
 
 def raw_words_path(url):
     domain, subdomain, path = word_raws(url)
@@ -352,11 +288,8 @@ def raw_words_path(url):
 def count_www_path(url):
     return raw_words(url).count("www")
 
-
-
 def count_com_path(url):
     return raw_words(url).count("com")
-
 
 def length_word_raw(url):
     return len(raw_words(url))
@@ -371,12 +304,10 @@ def longest_word_length(raw_words):
         return 0
     return max(len(word) for word in raw_words)
 
-
 def shortest_word_length(raw_words):
     if len(raw_words) == 0:
         return 0
     return min(len(word) for word in raw_words)
-
 
 ###################################################################################
 # get token of neilpatel https://app.neilpatel.com/api/get_token
@@ -394,8 +325,6 @@ def get_token():
         return token
     else:
         return None
-
-
 ###################################################################################
 # check web traffic base on site https://app.neilpatel.com/en/traffic_analyzer
 ###################################################################################
@@ -414,9 +343,7 @@ def web_traffic(url):
             "language": "en",
             "withKeywords": True
         }
-
         response = requests.get(url, headers=headers, params=params)
-
         if response.status_code == 200:
             data = response.json()
             traffic = data["traffic"]
@@ -425,7 +352,6 @@ def web_traffic(url):
             return 0
     except:
         return 0
-
 
 def whois_registered_domain(url):
     try:
