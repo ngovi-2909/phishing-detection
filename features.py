@@ -94,7 +94,7 @@ def countDollar(url):
 
 # 12
 def countAnd(url):
-    return len(re.findall("\&"), url)
+    return len(re.findall("\&", url))
 
 
 # 13
