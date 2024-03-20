@@ -88,6 +88,8 @@ def countSemicolon(url):
 def countDollar(url):
     return len(re.findall("\$", url))
 
+def countAnd(url):
+    return len(re.findall("\&", url))
 
 def countSlash(url):
     return len(re.findall(r'/', url))
